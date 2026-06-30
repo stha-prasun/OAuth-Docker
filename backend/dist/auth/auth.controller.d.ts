@@ -1,5 +1,6 @@
 import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
@@ -11,4 +12,8 @@ export declare class AuthController {
         googleId: string;
         createdAt: Date;
     }>;
+    login(loginDto: LoginDto): Promise<{
+        accessToken: string;
+    }>;
+    test(): string;
 }

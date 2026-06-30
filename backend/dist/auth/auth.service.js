@@ -46,10 +46,13 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("../user/user.service");
 const bcrypt = __importStar(require("bcrypt"));
+const jwt_1 = require("@nestjs/jwt");
 let AuthService = class AuthService {
     usersService;
-    constructor(usersService) {
+    jwtService;
+    constructor(usersService, jwtService) {
         this.usersService = usersService;
+        this.jwtService = jwtService;
     }
     async register(registerDto) {
         const existingUser = await this.usersService.findByEmail(registerDto.email);
@@ -65,10 +68,33 @@ let AuthService = class AuthService {
         const { password, ...result } = user;
         return result;
     }
+    async login(loginDto) {
+        const user = await this.usersService.findByEmail(loginDto.email);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Invalid email or password');
+        }
+        if (!user.password) {
+            throw new common_1.UnauthorizedException('This account uses Google login.');
+        }
+        const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+        if (!isPasswordValid) {
+            throw new common_1.UnauthorizedException('Invalid email or password');
+        }
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            role: user.role,
+        };
+        const accessToken = await this.jwtService.signAsync(payload);
+        return {
+            accessToken,
+        };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [user_service_1.UserService])
+    __metadata("design:paramtypes", [user_service_1.UserService,
+        jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map
