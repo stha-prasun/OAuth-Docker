@@ -1,26 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Course } from './entities/course.entity';
 
 @Injectable()
 export class CourseService {
-  create(createCourseDto: CreateCourseDto) {
-    return 'This action adds a new course';
-  }
+  constructor(
+    @InjectRepository(Course)
+    private readonly courseRepository: Repository<Course>,
+  ) {}
 
-  findAll() {
-    return `This action returns all course`;
-  }
+  async create(createCourseDto: CreateCourseDto) {
+    const course = await this.courseRepository.create({
+      title: createCourseDto.title,
+      description: createCourseDto.description,
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} course`;
-  }
+    if (!course) {
+      throw new InternalServerErrorException();
+    }
 
-  update(id: number, updateCourseDto: UpdateCourseDto) {
-    return `This action updates a #${id} course`;
-  }
+    await this.courseRepository.save(course);
 
-  remove(id: number) {
-    return `This action removes a #${id} course`;
+    return {
+      message: 'Course Created!',
+      success: true,
+    };
   }
 }

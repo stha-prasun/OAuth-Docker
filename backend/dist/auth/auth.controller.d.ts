@@ -15,5 +15,4 @@ export declare class AuthController {
     login(loginDto: LoginDto): Promise<{
         accessToken: string;
     }>;
-    test(): string;
 }
