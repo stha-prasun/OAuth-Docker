@@ -9,4 +9,15 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  async findByEmail(email: string): Promise<User | null> {
+  return this.userRepository.findOne({
+    where: { email },
+  });
+}
+
+async create(user: Partial<User>): Promise<User> {
+  const newUser = this.userRepository.create(user);
+  return this.userRepository.save(newUser);
+}
 }
